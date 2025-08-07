@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+	<head><title>realtime-chat</title></head>
+	<body>
+		<div id="login-section">
+			<h3>enter your username</h3>
+
+			<input type="text" id="username" placeholder="Username">
+			<button onclick="startChat()">join chat</button>
+		</div>
+
+
+		<div id="chat-section" style="display:none;">
+		<h3>websocket chat</h3>
+
+		<textarea id="chat" cols="50" rows="10" readonly></textarea><br>
+
+		<input type="text" id="message" placeholder="type a message..">
+		<button onclick="sendMessage()">send</button>
+		</div>
+
+		<script>
+                let ws;
+		let currentUser = "";
+
+		function startChat() {
+			const name = document.getElementById("username").value.trim();
+			if (!name) return alert("enter a username");
+
+			currentUser = name;
+
+			document.getElementById("login-section").style.display = "none";
+			document.getElementById("chat-section").style.display = "block";
+
+
+			const ws_scheme = location.protocol === "https:" ? "wss" : "ws";
+			const ws_url = `${ws_scheme}://${location.host}/ws?user=${encodeURIComponent(name)}`;
+			console.log("websocket url:", ws_url);
+
+			ws = new WebSocket(ws_url);
+
+			ws.onmessage = event => {
+				const ChatBox =	document.getElementById("chat");
+				ChatBox.value += event.data + "\n";
+
+				ChatBox.scrollTop = ChatBox.scrollHeight;
+
+				
+
+			};
+
+			ws.onerror = (event) => {
+				alert("websocket error occured");
+				console.error("websocket error", event);
+
+		};
+	}
+
+			function sendMessage() {
+				const input = document.getElementById("message");
+				const text = input.value.trim();
+
+				if (!text) return;
+
+				ws.send(text);
+				input.value = "";
+			}
+
+		
+
+		</script>
+
+	</body>
+</html>
+
+

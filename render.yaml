@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: realtime-chat-app
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
