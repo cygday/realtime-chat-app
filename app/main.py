@@ -6,10 +6,40 @@ from fastapi.responses import HTMLResponse
 from prometheus_client import Counter, generate_latest
 from starlette.responses import Response
 from typing import Dict
+import smtplib
 
 import os
+from email.mime.text import MIMEText
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SMTP_SERVER = os.getenv("SMTP_SERVER")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+SMTP_USERNAME = os.getenv("SMTP_USERNAME")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+NOTIFY_EMAIL = os.getenv("NOTIFY_EMAIL")
 
 app = FastAPI()
+
+connections = {}
+
+def send_email_notification(username: str):
+                subject = f"new chat user joined: {username}"
+                body = f"a new user has joined the chat:{username}"
+                msg = MIMEText(body)
+                msg["Subject"] = subject
+                msg["FROM"] = SMTP_USERNAME
+                msg["To"] = NOTIFY_EMAIL
+
+                try:
+                    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+                        server.starttls()
+                        server.login(SMTP_USERNAME, SMTP_PASSWORD)
+                        server.send_message(msg)
+                    print(f" email sent:{username} joined")
+                except Exception as e:
+                    print(f"failed to send email: {e}")
 
 active_connections: Dict[WebSocket, str] = {}
 
