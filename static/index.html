@@ -80,6 +80,8 @@ body{
 		<script>
                 let ws;
 		let currentUser = "";
+		
+		const joinSound = new Audio("/static/mama.mp3");
 
 		function startChat() {
 			const name = document.getElementById("username").value.trim();
@@ -103,7 +105,12 @@ body{
 
 				ChatBox.scrollTop = ChatBox.scrollHeight;
 
-				
+			//play sound when someone  joins
+				if (event.data.includes("joined the chat")) {
+					joinSound.play().catch(err => {
+						console.warn("sound playback blocked by browser until user interaction:", err);
+					});
+				}
 
 			};
 
